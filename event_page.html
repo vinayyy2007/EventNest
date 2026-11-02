@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Page</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #b9dde6;
+    margin: 0;
+    padding: 20px 28px;
+    color: #333;
+  }
+  h1 {
+    color: #a05a9a;
+    margin: 0 0 14px 0;
+    font-size: 32px;
+  }
+  .panel {
+    background: #eef6f0;
+    padding: 16px 24px 22px 24px;
+    border-radius: 4px;
+  }
+  .panel h2 {
+    margin: 0 0 14px 0;
+    font-size: 24px;
+    color: #333;
+  }
+  label {
+    display: block;
+    margin: 12px 0 6px 0;
+    font-size: 16px;
+  }
+  input[type="text"], input[type="date"], select {
+    padding: 7px 8px;
+    font-size: 14px;
+    border: 1px solid #8a93b8;
+    background: #fff;
+    border-radius: 2px;
+  }
+  input[type="text"] { width: 240px; }
+  .buttons { margin-top: 18px; }
+  button {
+    padding: 11px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 3px;
+    background: #6aa56a;
+    color: #fff;
+    cursor: pointer;
+    margin-right: 6px;
+  }
+  button.clear { background: #7db37d; }
+  button:hover { opacity: 0.9; }
+  #message {
+    margin-top: 14px;
+    font-size: 16px;
+    min-height: 20px;
+  }
+  .ok  { color: #2e7d32; }
+  .bad { color: #c62828; }
+
+  table {
+    width: 100%;
+    margin-top: 18px;
+    border-collapse: collapse;
+    background: #eef6f0;
+    border: 2px solid #7f8ec6;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 10px;
+    border: 1px solid #aab3dd;
+    font-size: 15px;
+  }
+  th { background: #dde3f5; font-size: 16px; }
+  .empty { text-align: center; color: #777; }
+</style>
+</head>
+<body>
+
+<h1>Event Registration</h1>
+
+<div class="panel">
+  <h2>Create an Event</h2>
+
+  <label for="eventId">Event ID:</label>
+  <input type="text" id="eventId" placeholder="Example: EVT1004">
+
+  <label for="eventName">Event Name:</label>
+  <input type="text" id="eventName" placeholder="Enter event name">
+
+  <label for="category">Category:</label>
+  <select id="category">
+    <option>Technical</option>
+    <option>Cultural</option>
+    <option>Sports</option>
+    <option>Workshop</option>
+    <option>Seminar</option>
+  </select>
+
+  <label for="venue">Venue:</label>
+  <select id="venue">
+    <option>Main Auditorium</option>
+    <option>Seminar Hall</option>
+    <option>Open Ground</option>
+    <option>Computer Lab</option>
+  </select>
+
+  <label for="date">Date:</label>
+  <input type="date" id="date">
+
+  <label for="coordinator">Coordinator:</label>
+  <input type="text" id="coordinator" placeholder="Enter coordinator name">
+
+  <div class="buttons">
+    <button onclick="addEvent()">Create Event</button>
+    <button class="clear" onclick="clearForm()">Clear</button>
+  </div>
+
+  <div id="message"></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Event ID</th>
+      <th>Event Name</th>
+      <th>Category</th>
+      <th>Venue</th>
+      <th>Date</th>
+      <th>Coordinator</th>
+    </tr>
+  </thead>
+  <tbody id="eventTable">
+    <tr><td colspan="6" class="empty">No records found.</td></tr>
+  </tbody>
+</table>
+
+<script>
+  var events = [];
+
+  function showMessage(text, good) {
+    var m = document.getElementById("message");
+    m.textContent = text;
+    m.className = good ? "ok" : "bad";
+  }
+
+  function drawTable() {
+    var body = document.getElementById("eventTable");
+    body.innerHTML = "";
+    if (events.length === 0) {
+      body.innerHTML = '<tr><td colspan="6" class="empty">No records found.</td></tr>';
+      return;
+    }
+    events.forEach(function (e) {
+      var row = body.insertRow();
+      [e.id, e.name, e.category, e.venue, e.date, e.coordinator].forEach(function (v) {
+        row.insertCell().textContent = v;
+      });
+    });
+  }
+
+  function addEvent() {
+    var id = document.getElementById("eventId").value.trim();
+    var name = document.getElementById("eventName").value.trim();
+    var category = document.getElementById("category").value;
+    var venue = document.getElementById("venue").value;
+    var date = document.getElementById("date").value;
+    var coordinator = document.getElementById("coordinator").value.trim();
+
+    if (id === "" || name === "" || date === "" || coordinator === "") {
+      showMessage("Please fill all the fields.", false);
+      return;
+    }
+    for (var i = 0; i < events.length; i++) {
+      if (events[i].id.toLowerCase() === id.toLowerCase()) {
+        showMessage("Event ID already exists!", false);
+        return;
+      }
+      if (events[i].venue === venue && events[i].date === date) {
+        showMessage("Venue is already booked on this date!", false);
+        return;
+      }
+    }
+
+    events.push({ id: id, name: name, category: category, venue: venue, date: date, coordinator: coordinator });
+    drawTable();
+    showMessage("Event successfully created!", true);
+    clearFields();
+  }
+
+  function clearFields() {
+    document.getElementById("eventId").value = "";
+    document.getElementById("eventName").value = "";
+    document.getElementById("category").selectedIndex = 0;
+    document.getElementById("venue").selectedIndex = 0;
+    document.getElementById("date").value = "";
+    document.getElementById("coordinator").value = "";
+  }
+
+  function clearForm() {
+    clearFields();
+    document.getElementById("message").textContent = "";
+  }
+</script>
+
+</body>
+</html>
